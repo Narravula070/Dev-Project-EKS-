@@ -7,78 +7,62 @@ terraform {
   }
 }
 
-# Configure the AWS Provider
 provider "aws" {
-  region = "ap-south-1"
+  region = var.aws_region
 }
 
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "my-demo-vpc"
-  cidr = "10.10.0.0/16"
+  name = var.vpc_name
+  cidr = var.vpc_cidr
 
-  azs             = ["ap-south-1a", "ap-south-1b", "ap-south-1c"]
-  private_subnets = ["10.10.1.0/24", "10.10.2.0/24", "10.10.3.0/24"]
-  public_subnets  = ["10.10.101.0/24", "10.10.102.0/24", "10.10.103.0/24"]
+  azs             = var.availability_zones
+  private_subnets = var.private_subnets
+  public_subnets  = var.public_subnets
 
-  enable_nat_gateway = true
-  enable_vpn_gateway = true
+  enable_nat_gateway = var.enable_nat_gateway
+  enable_vpn_gateway = var.enable_vpn_gateway
 
   tags = {
-    Terraform = "true"
-    Environment = "dev"
+    Terraform   = "true"
+    Environment = var.environment
   }
 }
-
-
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
 
-  cluster_name    = "my-cluster"
-  cluster_version = "1.29"
+  cluster_name    = var.cluster_name
+  cluster_version = var.cluster_version
 
-  cluster_endpoint_public_access  = true
+  cluster_endpoint_public_access  = var.cluster_endpoint_public_access
 
-  cluster_addons = {
-    coredns = {
-      most_recent = true
-    }
-    kube-proxy = {
-      most_recent = true
-    }
-    vpc-cni = {
-      most_recent = true
-    }
-  }
+  cluster_addons = var.cluster_addons
 
   vpc_id                   = module.vpc.vpc_id
-  
   control_plane_subnet_ids = module.vpc.public_subnets
-
   subnet_ids               = module.vpc.private_subnets
-  # EKS Managed Node Group(s)
+
   eks_managed_node_group_defaults = {
-    instance_types = ["t3.medium"]
+    instance_types = var.default_instance_types
   }
 
   eks_managed_node_groups = {
     example = {
-      min_size     = 1
-      max_size     = 2
-      desired_size = 1
+      min_size     = var.node_group_min_size
+      max_size     = var.node_group_max_size
+      desired_size = var.node_group_desired_size
 
-      instance_types = ["t3.medium"]
+      instance_types = var.node_group_instance_types
     }
   }
 
-  # Cluster access entry
-  # To add the current caller identity as an administrator
-  enable_cluster_creator_admin_permissions = true
+  enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
+
   tags = {
-    Environment = "dev"
+    Environment = var.environment
     Terraform   = "true"
   }
 }

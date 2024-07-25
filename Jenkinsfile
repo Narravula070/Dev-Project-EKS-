@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Git Checkout') {
             steps {
-                git branch: 'main', credentialsId: 'git-pro', url: 'https://github.com/kranthi619/dev-pro.git'
+                git branch: 'main', credentialsId: 'git-pro', url: 'https://github.com/Narravula070/Dev-Project-EKS.git'
             }
         }
 
@@ -54,7 +54,7 @@ pipeline {
         stage('Docker Image Creation') {
             steps {
                 echo 'Building Docker image using Dockerfile'
-                sh 'docker build -t kranthi619/dev-pro2 .'
+                sh 'docker build -t muni070/dev-pro1.'
             }
         }
 
@@ -67,8 +67,8 @@ pipeline {
         stage('Docker Login and Push') {
             steps {
                 echo 'Logging in to Docker Hub'
-                sh 'docker login -u kranthi619 -p Kranthi123#'
-                sh 'docker push kranthi619/dev-pro2:latest'
+                sh 'docker login -u muni070 -p Munisai@070'
+                sh 'docker push muni070/dev-pro1:latest'
             }
         }
 
